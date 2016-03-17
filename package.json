@@ -1,0 +1,27 @@
+{
+  "name": "chatroom",
+  "version": "1.0.0",
+  "description": "使用node.js与socket.io开发的聊天室",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/limeng0403/chatroom.git"
+  },
+  "keywords": [
+    "chatroom",
+    "chat"
+  ],
+  "author": "Lion Lee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/limeng0403/chatroom/issues"
+  },
+  "homepage": "https://github.com/limeng0403/chatroom#readme",
+  "dependencies": {
+    "express": "^4.13.4",
+    "socket.io": "^1.4.5"
+  }
+}
