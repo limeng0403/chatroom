@@ -43,6 +43,15 @@
         height: 70%;
         overflow: auto;
     }
+    
+    .tag {
+        height: auto;
+        line-height: 24px;
+        max-width: 99%;
+        word-wrap: break-word;
+        word-break: break-all;
+        white-space: normal;
+    }
     </style>
 </head>
 
@@ -50,10 +59,7 @@
     <div class="columns wrapper">
         <div class="column is-quarter">
             <div class="menu">
-                <p class="menu-heading">用户列表</p>
-                <a class="menu-block is-active" href="#">
-                    <span class="menu-icon">a</span> bulma-website
-                </a>
+                <userlist></userlist>
             </div>
         </div>
         <div class="column chat">
@@ -77,19 +83,56 @@
             return {
                 restrict: 'EAC',
                 link: function($scope, $ele, $atr) {
-                    $ele.append('<p>welcome!</p>');
                     $scope.$on('new msg', function(d, newValue) {
+                        var title = newValue.userName;
+                        var body = newValue.msg;
+                        var msgType = 'is-info';
+
                         if (newValue) {
-                            $ele.append('<p>' + newValue + '</p>');
+                            switch (newValue) {
+                                case 'transport close':
+                                    title = '服务器';
+                                    body = '服务器中断， 请等待.....';
+                                    msgType = 'is-danger';
+                                    break;
+                                default:
+                            }
+
+                            if (newValue.userId === 0) {
+                                msgType = 'is-warning';
+                            }
+
+                            var template = '<span class="tag ' + msgType + '"><em>' + title + '</em>：<br />' + body + '</span><br /><br />';
+
+                            $ele.append(template);
 
                             $ele[0].scrollTop = $ele[0].scrollHeight;
                         }
-                    })
+                    });
+                }
+            }
+        })
+        .directive('userlist', function() {
+            return {
+                restrict: 'EAC',
+                link: function($scope, $ele, $atr) {
+                    $ele.append('<p class="menu-heading">用户列表</p>');
+                    $scope.$on('user list', function(d, newValue) {
+                        if (newValue) {
+                            $ele.html('');
+                            $ele.append('<p class="menu-heading">用户列表</p>');
+
+                            for (i in newValue) {
+                                $ele.append('<a class="menu-block is-active" href="javascript:;"><span class="menu-icon">a</span>' + newValue[i].userId + '</a>');
+                            }
+                        }
+                    });
                 }
             }
         })
         .controller('chatMainCtrl', ['$scope', '$interval', function($scope, $interval) {
             $scope.postText = '';
+            $scope.userList = [];
 
             $scope.postSentEvent = function() {
                 socket.emit('chat message', $scope.postText);
@@ -99,14 +142,22 @@
             }
 
             socket.on('chat message', function(msg) {
-                $scope.newMsg = ''
-                $scope.newMsg = msg;
-
                 $scope.$emit('new msg', msg);
 
                 return false;
             });
 
+            socket.on('disconnect', function(msg) {
+                $scope.$emit('new msg', msg);
+
+                return false;
+            });
+
+            socket.on('user list', function(msg) {
+                $scope.$emit('user list', msg);
+
+                return false;
+            });
         }])
     </script>
 </body>
