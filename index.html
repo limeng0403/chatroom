@@ -66,9 +66,9 @@
             <posttext class="post-list">
             </posttext>
             <div class="column post">
-                <textarea id="postText" ng-model="postText" class="post-text"></textarea>
+                <textarea id="postText" ng-model="postText" class="post-text" ng-keyup="event=$event;postTextKeydownEvent()"></textarea>
                 <div class="post-fun">
-                    <a class="button is-success" ng-click="postSentEvent()">发送</a>
+                    <a class="button is-success" ng-click="postSentEvent(event)">发送</a>
                 </div>
             </div>
         </div>
@@ -133,12 +133,19 @@
         .controller('chatMainCtrl', ['$scope', '$interval', function($scope, $interval) {
             $scope.postText = '';
             $scope.userList = [];
+            $scope.event = this;
 
             $scope.postSentEvent = function() {
                 socket.emit('chat message', $scope.postText);
                 $scope.postText = '';
 
                 return false;
+            }
+
+            $scope.postTextKeydownEvent = function() {
+                if ($scope.event.keyCode == 13) {
+                    $scope.postSentEvent();
+                }
             }
 
             socket.on('chat message', function(msg) {
