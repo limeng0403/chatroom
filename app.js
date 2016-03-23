@@ -35,9 +35,6 @@ io.on('connection', function(socket) {
         roomNum: roomNum
     }
 
-    console.info('userList', userList);
-    console.info('roomList', roomList);
-
     //用户加入房间
     socket.join(roomNum);
 
@@ -65,12 +62,11 @@ io.on('connection', function(socket) {
 
         io.to(userList[userId].roomNum).emit('chat message', msg);
 
-        console.info('rn:', rn);
-        console.info('roomList[roomNum]:', roomList[roomNum]);
-
         var rlist = roomList[roomNum];
 
         io.to(userList[userId].roomNum).emit('user list', rlist);
+
+        console.info(msg);
     });
 
     //失去连接监听
