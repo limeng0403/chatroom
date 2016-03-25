@@ -45,3 +45,15 @@ body {
     word-break: break-all;
     white-space: normal;
 }
+
+.menu {
+    border: none;
+}
+
+.display-inline-block {
+    display: inline-block !important;
+}
+
+.w10p {
+    width: 10% !important;
+}

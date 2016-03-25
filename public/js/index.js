@@ -1,11 +1,11 @@
 var socket = io();
 
-angular.module('chatApp', [])
-    .directive('posttext', function() {
+angular.module('chatApp', ['ngCookies'])
+    .directive('posttext', function () {
         return {
             restrict: 'EAC',
-            link: function($scope, $ele, $atr) {
-                $scope.$on('new msg', function(d, newValue) {
+            link: function ($scope, $ele, $atr) {
+                $scope.$on('new msg', function (d, newValue) {
                     var title = newValue.userName;
                     var body = newValue.msg;
                     var msgType = 'is-info';
@@ -24,7 +24,7 @@ angular.module('chatApp', [])
                             msgType = 'is-warning';
                         }
 
-                        var template = '<span class="tag ' + msgType + '"><em>' + title + '</em>：<br />' + body + '</span><br /><br />';
+                        var template = '<span class="tag ' + msgType + '"><em>' + title + '</em>：' + body + '</span><br /><br />';
 
                         $ele.append(template);
 
@@ -34,57 +34,71 @@ angular.module('chatApp', [])
             }
         }
     })
-    .directive('userlist', function() {
+    .directive('userlist', function () {
         return {
             restrict: 'EAC',
-            link: function($scope, $ele, $atr) {
+            link: function ($scope, $ele, $atr) {
                 $ele.append('<p class="menu-heading">用户列表</p>');
-                $scope.$on('user list', function(d, newValue) {
+                $scope.$on('user list', function (d, newValue) {
                     if (newValue) {
                         $ele.html('');
                         $ele.append('<p class="menu-heading">用户列表</p>');
 
                         for (i in newValue) {
-                            $ele.append('<a class="menu-block is-active" href="javascript:;"><span class="menu-icon">a</span>' + newValue[i].userId + '</a>');
+                            $ele.append('<a class="menu-block is-active" href="javascript:;"><span class="menu-icon">a</span>' + newValue[i].userName + '</a>');
                         }
                     }
                 });
             }
         }
     })
-    .controller('chatMainCtrl', ['$scope', '$interval', function($scope, $interval) {
+    .controller('chatMainCtrl', ['$scope', '$interval', '$cookies', function ($scope, $interval, $cookies) {
         $scope.postText = '';
         $scope.userList = [];
         $scope.event = this;
 
-        $scope.postSentEvent = function() {
+        $scope.postSentEvent = function () {
             socket.emit('chat message', $scope.postText);
             $scope.postText = '';
 
             return false;
-        }
+        };
 
-        $scope.postTextKeydownEvent = function() {
+        $scope.postTextKeydownEvent = function () {
             if ($scope.event.keyCode == 13) {
                 $scope.postSentEvent();
             }
-        }
+        };
 
-        socket.on('chat message', function(msg) {
+        $scope.renameEvent = function () {
+            console.info($scope.newName);
+            if ($scope.newName.replace(/ /ig, '')) {
+                socket.emit('change name', {
+                    newName: $scope.newName
+                });
+            }
+        };
+
+        socket.on('chat message', function (msg) {
             $scope.$emit('new msg', msg);
 
             return false;
         });
 
-        socket.on('disconnect', function(msg) {
+        socket.on('disconnect', function (msg) {
             $scope.$emit('new msg', msg);
 
             return false;
         });
 
-        socket.on('user list', function(msg) {
+        socket.on('user list', function (msg) {
             $scope.$emit('user list', msg);
 
             return false;
         });
-    }])
+
+        socket.on('user id', function (msg) {
+            $cookies.put('data1', msg);
+        });
+
+    }]);

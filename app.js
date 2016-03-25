@@ -9,11 +9,11 @@ var userList = {}; //用户列表，包含用户信息
 
 app.use(express.static(__dirname + '/public'));
 
-app.all('*', function(req, res) {
+app.all('*', function (req, res) {
     res.sendfile('index.html');
 });
 
-io.on('connection', function(socket) {
+io.on('connection', function (socket) {
     var requrl = socket.request.headers.referer; //取出请求地址
     var roomNum = url.parse(requrl).path; //取出请求地址中的pathname
     roomNum = roomNum.replace(/\//ig, ''); //整理pathname，当做房间号
@@ -33,7 +33,7 @@ io.on('connection', function(socket) {
     //将用户保存在用户信息中
     userList[userId] = {
         roomNum: roomNum
-    }
+    };
 
     //用户加入房间
     socket.join(roomNum);
@@ -48,9 +48,13 @@ io.on('connection', function(socket) {
     io.to(userList[userId].roomNum).emit('chat message', msg);
     //发送新的用户清单
     io.to(userList[userId].roomNum).emit('user list', roomList[roomNum]);
+    //发送新的用户清单
+    io.to(userList[userId].roomNum).emit('user id', userId);
 
     //消息事件监听
-    socket.on('chat message', function(msg) {
+    socket.on('chat message', function (msg) {
+        console.log(socket.request.headers.cookie);
+
         var rn = userList[userId].roomNum;
         var userName = roomList[rn][userId].userName;
 
@@ -69,15 +73,41 @@ io.on('connection', function(socket) {
         console.info(msg);
     });
 
+    socket.on('change name', function (msg) {
+        var rn = userList[userId].roomNum;
+        var userName = roomList[rn][userId].userName;
+        var newName = msg.newName;
+        var message = '【' + userId + '】改名为：' + newName;
+
+        var msg = {
+            userId: 0,
+            userName: '系统',
+            msg: message
+        };
+
+        roomList[roomNum][userId] = {
+            userId: userId,
+            userName: newName
+        };
+
+        io.to(userList[userId].roomNum).emit('chat message', msg);
+
+        var rlist = roomList[roomNum];
+
+        console.info(rlist);
+
+        io.to(userList[userId].roomNum).emit('user list', rlist);
+    });
+
     //失去连接监听
-    socket.on('disconnect', function(socket) {
+    socket.on('disconnect', function (socket) {
         /**失去连接后的事件处理：
          **消除用户列表当前用户信息
          **消除房间列表当前用户信息
          */
 
         //从用户列表数组从取出用户所对应的房间信息
-        var roomNum = userList[userId].roomNum
+        var roomNum = userList[userId].roomNum;
 
         delete userList[userId];
         delete roomList[roomNum][userId];
@@ -94,7 +124,6 @@ io.on('connection', function(socket) {
 });
 
 
-
-http.listen(3000, function() {
+http.listen(3000, function () {
     console.log('listening on *:3000');
 });
