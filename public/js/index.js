@@ -22,6 +22,8 @@ angular.module('chatApp', ['ngCookies'])
 
                         if (newValue.userId === 0) {
                             msgType = 'is-warning';
+                        } else if (title == $scope.localUserName) {
+                            msgType = 'is-success';
                         }
 
                         var template = '<span class="tag ' + msgType + '"><em>' + title + '</em>：' + body + '</span><br /><br />';
@@ -56,6 +58,8 @@ angular.module('chatApp', ['ngCookies'])
         $scope.postText = '';
         $scope.userList = [];
         $scope.event = this;
+        $scope.newName = parseInt(Math.random() * 90000 + 10000) + '';
+        $scope.localUserName = $scope.newName;
 
         $scope.postSentEvent = function () {
             socket.emit('chat message', $scope.postText);
@@ -71,13 +75,18 @@ angular.module('chatApp', ['ngCookies'])
         };
 
         $scope.renameEvent = function () {
-            console.info($scope.newName);
             if ($scope.newName.replace(/ /ig, '')) {
                 socket.emit('change name', {
                     newName: $scope.newName
                 });
             }
+
+            $scope.localUserName = $scope.newName;
+
+            $scope.newName = '';
         };
+
+        $scope.renameEvent();
 
         socket.on('chat message', function (msg) {
             $scope.$emit('new msg', msg);
@@ -95,10 +104,6 @@ angular.module('chatApp', ['ngCookies'])
             $scope.$emit('user list', msg);
 
             return false;
-        });
-
-        socket.on('user id', function (msg) {
-            $cookies.put('data1', msg);
         });
 
     }]);

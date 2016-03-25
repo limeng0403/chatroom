@@ -48,13 +48,9 @@ io.on('connection', function (socket) {
     io.to(userList[userId].roomNum).emit('chat message', msg);
     //发送新的用户清单
     io.to(userList[userId].roomNum).emit('user list', roomList[roomNum]);
-    //发送新的用户清单
-    io.to(userList[userId].roomNum).emit('user id', userId);
 
     //消息事件监听
     socket.on('chat message', function (msg) {
-        console.log(socket.request.headers.cookie);
-
         var rn = userList[userId].roomNum;
         var userName = roomList[rn][userId].userName;
 
@@ -77,7 +73,20 @@ io.on('connection', function (socket) {
         var rn = userList[userId].roomNum;
         var userName = roomList[rn][userId].userName;
         var newName = msg.newName;
-        var message = '【' + userId + '】改名为：' + newName;
+        var message = '【' + userName + '】改名为：' + newName;
+        var isExist = false;
+
+        for (var i in roomList[roomNum]) {
+            if (roomList[roomNum][i].userName == newName) {
+                isExist = true;
+                message = '【' + userName + '】改名失败，【' + newName + '】已存在。';
+                break;
+            }
+        }
+
+        if (newName.replace(/ /ig, '').length == 0) {
+            message = '【' + userName + '】改名失败，名字不能为空。';
+        }
 
         var msg = {
             userId: 0,
@@ -85,16 +94,16 @@ io.on('connection', function (socket) {
             msg: message
         };
 
-        roomList[roomNum][userId] = {
-            userId: userId,
-            userName: newName
-        };
+        if (!isExist) {
+            roomList[roomNum][userId] = {
+                userId: userId,
+                userName: newName
+            };
+        }
 
         io.to(userList[userId].roomNum).emit('chat message', msg);
 
         var rlist = roomList[roomNum];
-
-        console.info(rlist);
 
         io.to(userList[userId].roomNum).emit('user list', rlist);
     });
