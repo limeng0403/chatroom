@@ -117,6 +117,7 @@ io.on('connection', function (socket) {
 
         //从用户列表数组从取出用户所对应的房间信息
         var roomNum = userList[userId].roomNum;
+        var userName = roomList[roomNum][userId].userName;
 
         delete userList[userId];
         delete roomList[roomNum][userId];
@@ -124,7 +125,7 @@ io.on('connection', function (socket) {
         var msg = {
             userId: 0,
             userName: '系统',
-            msg: userId + '退出房间'
+            msg: userName + '退出房间'
         };
 
         io.to(roomNum).emit('chat message', msg);
