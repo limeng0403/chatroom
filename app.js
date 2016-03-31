@@ -9,18 +9,18 @@ var userList = {}; //用户列表，包含用户信息
 
 app.use(express.static(__dirname + '/public'));
 
-app.all('*', function (req, res) {
+app.all('*', function(req, res){
     res.sendfile('index.html');
 });
 
-io.on('connection', function (socket) {
+io.on('connection', function(socket){
     var requrl = socket.request.headers.referer; //取出请求地址
     var roomNum = url.parse(requrl).path; //取出请求地址中的pathname
     roomNum = roomNum.replace(/\//ig, ''); //整理pathname，当做房间号
     var userId = socket.id.replace(/\/\#/ig, ''); //获取用户ID
 
     //如果没有房间，创建房间
-    if (!roomList[roomNum]) {
+    if(!roomList[roomNum]){
         roomList[roomNum] = {}
     }
 
@@ -50,15 +50,22 @@ io.on('connection', function (socket) {
     io.to(userList[userId].roomNum).emit('user list', roomList[roomNum]);
 
     //消息事件监听
-    socket.on('chat message', function (msg) {
+    socket.on('chat message', function(msg){
         var rn = userList[userId].roomNum;
         var userName = roomList[rn][userId].userName;
+
+        msg = msg.replace(/</ig, '&lt;');
+        msg = msg.replace(/>/ig, '&gt;');
 
         var msg = {
             userId: userId,
             userName: userName,
             msg: msg
         };
+
+        if(msg.msg.replace(/ /ig, '').length == 0){
+            return false;
+        }
 
         io.to(userList[userId].roomNum).emit('chat message', msg);
 
@@ -69,23 +76,29 @@ io.on('connection', function (socket) {
         console.info(msg);
     });
 
-    socket.on('change name', function (msg) {
+    socket.on('change name', function(msg){
         var rn = userList[userId].roomNum;
         var userName = roomList[rn][userId].userName;
         var newName = msg.newName;
         var message = '【' + userName + '】改名为：' + newName;
         var isExist = false;
 
-        for (var i in roomList[roomNum]) {
-            if (roomList[roomNum][i].userName == newName) {
+        for(var i in roomList[roomNum]){
+            if(roomList[roomNum][i].userName == newName){
                 isExist = true;
                 message = '【' + userName + '】改名失败，【' + newName + '】已存在。';
                 break;
             }
         }
 
-        if (newName.replace(/ /ig, '').length == 0) {
+        if(newName.replace(/ /ig, '').length == 0){
             message = '【' + userName + '】改名失败，名字不能为空。';
+        }
+
+        //临时创建用户名验证
+        if(/(妈|娘|爸|爹)/.test(newName)){
+            isExist = true;
+            message = '【' + userName + '】改名失败，请注意不要使用敏感字。';
         }
 
         var msg = {
@@ -94,7 +107,7 @@ io.on('connection', function (socket) {
             msg: message
         };
 
-        if (!isExist) {
+        if(!isExist){
             roomList[roomNum][userId] = {
                 userId: userId,
                 userName: newName
@@ -109,7 +122,7 @@ io.on('connection', function (socket) {
     });
 
     //失去连接监听
-    socket.on('disconnect', function (socket) {
+    socket.on('disconnect', function(socket){
         /**失去连接后的事件处理：
          **消除用户列表当前用户信息
          **消除房间列表当前用户信息
@@ -134,6 +147,6 @@ io.on('connection', function (socket) {
 });
 
 
-http.listen(3000, function () {
+http.listen(3000, function(){
     console.log('listening on *:3000');
 });

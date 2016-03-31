@@ -26,7 +26,7 @@ angular.module('chatApp', ['ngCookies'])
                             msgType = 'is-success';
                         }
 
-                        var template = '<span class="tag ' + msgType + '"><em>' + title + '</em>：' + body + '</span><br /><br />';
+                        var template = '<span class="tag ' + msgType + '"><span class="talk-name">' + title + '</span>：' + body + '</span><br /><br />';
 
                         $ele.append(template);
 
@@ -47,7 +47,7 @@ angular.module('chatApp', ['ngCookies'])
                         $ele.append('<p class="menu-heading">用户列表</p>');
 
                         for (i in newValue) {
-                            $ele.append('<a class="menu-block is-active" href="javascript:;"><span class="menu-icon">a</span>' + newValue[i].userName + '</a>');
+                            $ele.append('<a class="menu-block is-active" href="javascript:;"><span class="menu-icon">&hearts;</span>' + newValue[i].userName + '</a>');
                         }
                     }
                 });
@@ -60,8 +60,17 @@ angular.module('chatApp', ['ngCookies'])
         $scope.event = this;
         $scope.newName = parseInt(Math.random() * 90000 + 10000) + '';
         $scope.localUserName = $scope.newName;
+        $scope.isShowDialog = false;
+        $scope.dialogContent = '';
 
         $scope.postSentEvent = function () {
+            var postText = $scope.postText;
+            if (postText.replace(/ /ig, '').length == 0) {
+                $scope.dialogContent = '请输入要发送的信息。';
+                $scope.isShowDialog = true;
+                return false;
+            }
+
             socket.emit('chat message', $scope.postText);
             $scope.postText = '';
 
@@ -87,6 +96,10 @@ angular.module('chatApp', ['ngCookies'])
         };
 
         $scope.renameEvent();
+
+        $scope.closeDialog = function () {
+            $scope.isShowDialog = false;
+        };
 
         socket.on('chat message', function (msg) {
             $scope.$emit('new msg', msg);

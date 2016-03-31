@@ -12,29 +12,36 @@ body {
 .chat {
     position: relative;
     height: 100%;
-    border-left: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
     min-height: 320px;
+    padding-left: 0;
 }
 
 .column.post {
-    height: 30%;
+    height: auto;
     position: absolute;
     left: 0;
-    bottom: 0;
-    border-top: 1px solid #ccc;
+    border-top: 3px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
     width: 100%;
 }
 
 .post-text {
-    width: 99%;
-    height: 60%;
+    display: inline-block;
+    width: 50%;
 }
 
 .post-list {
     display: block;
-    height: 70%;
+    height: 85%;
+    max-height: 500px;
     overflow: auto;
+    border-left: 1px solid #ccc;
+    padding-left: 10px;
+}
+
+.talk-name{
+    font-weight: bolder;
 }
 
 .tag {

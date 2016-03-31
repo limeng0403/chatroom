@@ -10,7 +10,7 @@
 
 <body ng-controller="chatMainCtrl">
 <div class="columns wrapper">
-    <div class="column is-quarter">
+    <div class="column is-2">
         <div class="menu">
             <userlist></userlist>
         </div>
@@ -19,16 +19,38 @@
         <posttext class="post-list">
         </posttext>
         <div class="column post">
-            <textarea id="postText" ng-model="postText" class="post-text"
-                      ng-keyup="event=$event;postTextKeydownEvent()"></textarea>
+            <p class="control">
+                <input type="text" id="postText" ng-model="postText" class="input post-text" ng-keyup="event=$event;postTextKeydownEvent()"/>
+                <a class="button is-success" ng-click="postSentEvent(event)">发送</a>
+            </p>
+
 
             <div class="post-fun">
-                <input class="input display-inline-block w10p" type="text" ng-model="newName" placeholder="改名">
-                <a class="button is-info" ng-click="renameEvent()">改名</a>
-                <a class="button is-success" ng-click="postSentEvent(event)">发送</a>
+                <input class="input display-inline-block w10p" type="text" ng-model="newName" placeholder="改名"> <a class="button is-info" ng-click="renameEvent()">改名</a>
+
             </div>
         </div>
     </div>
+</div>
+<div class="modal" ng-class="{'is-active':isShowDialog}">
+    <div class="modal-background"></div>
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="box">
+                <article class="media">
+                    <div class="media-content">
+                        <div class="content">
+                            <p ng-bind="dialogContent"></p>
+                            <p style="text-align: right;">
+                                <a class="button is-info" ng-click="closeDialog()">好的</a>
+                            </p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <button class="modal-close" ng-click="closeDialog()"></button>
 </div>
 <script type="text/javascript" src="js/socket.io.js"></script>
 <script type="text/javascript" src="https://cdn.bootcss.com/angular.js/1.4.9/angular.min.js"></script>
